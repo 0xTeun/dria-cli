@@ -1,0 +1,13 @@
+name: smol-dria-terminal
+
+default_network: ethereum
+
+ethereum:
+  default_network: mainnet
+  mainnet:
+    default_provider: alchemy
+
+arbitrum:
+  default_network: mainnet
+  mainnet:
+    default_provider: alchemy

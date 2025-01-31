@@ -1,12 +1,11 @@
 import click
-from langchain.agents import initialize_agent, AgentType
-from langchain.chains.conversation.memory import ConversationBufferMemory
-# from tools.blockchain_tools import get_current_block, send_eth_transfer
+from terminal import DriaTerminal
 
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_ollama.llms import OllamaLLM
+@click.command()
+def main():
+    """Entry point for smol-dria-terminal"""
+    terminal = DriaTerminal()
+    terminal.run()
 
-def create_agent():
-    model = OllamaLLM(model="hf.co/DevQuasar/Dria-Agent-a-3B:Q5_K_M")
-    
-
+if __name__ == "__main__":
+    main()

@@ -8,31 +8,30 @@ class DriaTerminal:
         self.session = PromptSession()
         self.agent = None # create_dria_agent()
         self.network = None
+        self.ecosystem = None
         self.account = None
         self._connect_to_default_network()
     
     def _connect_to_default_network(self):
         """Connect to ethereum mainnet by default"""
         try:
-            # Disconnect if already connected
-            if networks.active_provider:
-                networks.active_provider.disconnect()
             
             # Connect to ethereum mainnet using network choice format
             with networks.parse_network_choice("ethereum:mainnet:alchemy") as provider:
-                # chain.provider = provider
                 self.network = provider.network.name
+                self.ecosystem = provider.network.ecosystem.name
                 
-                # Try to load first account if available
-                if accounts.aliases:
-                    self.account = accounts.load(accounts.aliases[0])
+                # # Try to load first account if available
+                # if accounts.aliases:
+                #     self.account = accounts.load(accounts.aliases[0])
                 
-                print(f"Connected to {self.network}")
-                if self.account:
-                    print(f"Using account: {self.account.address}")
+                # print(f"Connected to {self.network}")
+                # if self.account:
+                #     print(f"Using account: {self.account.address}")
                 
         except Exception as e:
             print(f"Failed to connect to network: {str(e)}")
+            self.ecosystem = "not-connected"
             self.network = "not-connected"
             self.account = None
 
@@ -48,7 +47,6 @@ class DriaTerminal:
                 network_choice += f":{provider}"
             
             with networks.parse_network_choice(network_choice) as provider:
-                chain.provider = provider
                 self.network = provider.network.name
                 print(f"Switched to {self.network}")
                 
@@ -60,7 +58,7 @@ class DriaTerminal:
         """Generate the IPython-style prompt"""
         network = self.network or "not-connected"
         account = self.account.address[:6] + "..." + self.account.address[-3:] if self.account else "no-wallet"
-        return HTML(f'[<blue>{network}</blue>][<green>{account}</green>] >> ')
+        return HTML(f'[<blue>{self.ecosystem}:{network}</blue>][<green>{account}</green>] >> ')
 
     def _handle_network_command(self, command: str) -> bool:
         """Handle network switching commands"""

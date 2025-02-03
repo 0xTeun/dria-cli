@@ -1,22 +1,21 @@
 from utils import extract_tool_docstrings, SYSTEM_PROMPT
-# from tools.blockchain_tools import get_current_block, send_eth_transfer
-
 from langchain_ollama.llms import OllamaLLM
 
-def setup_model():
-    model = OllamaLLM(model="hf.co/DevQuasar/Dria-Agent-a-3B:Q5_K_M")
+class DriaAgent:
+    def __init__(self):
+        self.model = OllamaLLM(model="hf.co/DevQuasar/Dria-Agent-a-3B:Q5_K_M")
+        self.system_prompt = SYSTEM_PROMPT.replace(
+            "{{functions_schema}}", 
+            extract_tool_docstrings("tools")
+        )
 
-    system_prompt = SYSTEM_PROMPT.replace("{{functions_schema}}", extract_tool_docstrings("tools"))
-    # prompt = ChatPromptTemplate.from_template(system_prompt)
-    human_query = "Can you get me the latest block number of arbitrum mainnet?"
-    messages = [
-        {"role" : "system", "content" : system_prompt},
-        {"role" : "human", "content" : human_query}
-    ]
+    def generate_response(self, human_query: str):
+        messages = [
+            {"role" : "system", "content" : self.system_prompt},
+            {"role" : "human", "content" : human_query}
+        ]
+        response = self.model.invoke(messages)
+        return response
 
-    response = model.invoke(messages)
-    return response
-
-
-if __name__=="__main__":
-    print(setup_model())
+def create_dria_agent():
+    return DriaAgent()

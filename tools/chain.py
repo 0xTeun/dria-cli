@@ -1,30 +1,32 @@
-from langchain.tools import tool
 from ape.api.providers import BlockAPI
 from ape import chain, networks
 
-@tool
-def activate_chain(ecosystem:str, chain="mainnet")-> bool:
+def tool(func):
     """
-    Activate the specified blockchain ecosystem and chain.
+    Custom tool decorator that preserves function metadata 
+    and adds a marker for tool identification.
+    """
+    func.is_tool = True
+    return func
+
+@tool
+def activate_chain(chain:str, network:str):
+    """
+    Activate the specified blockchain network. 
+    Supported blockchains are Ethereum, Base, Arbitrum, and Optimism.
+    Supported networks are mainnet and testnet.
 
     Args:
-        ecosystem (str): The name of the ecosystem to activate.
-        chain (str, optional): The name of the chain to activate. 
-                               Defaults to "mainnet".
-
-    Returns:
-        bool: True if the ecosystem and chain were activated successfully, 
-              False otherwise.
+        chain (str): The name of the blockchain to activate.
+        network (str, optional): The type of the chain to activate. 
     """
     try:
-        with networks.parse_network_choice(f"{ecosystem}:f{chain}:alchemy") as provider:
-            print(f"changed to {provider.name}")
-            print(dir(provider))
-            pass
-        return True
+        with networks.parse_network_choice(f"{chain}:{network}:alchemy") as provider:
+            print(f"Activated {provider.network_choice}")
+            return provider
     except Exception as e:
         print(e)
-        return False
+        return None
 
 @tool
 def get_latest_block() -> dict:

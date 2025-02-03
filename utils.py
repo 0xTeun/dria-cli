@@ -1,6 +1,7 @@
 import textwrap
 import ast
 import os
+import re
 
 SYSTEM_PROMPT = """
 You are an expert AI assistant that specializes in providing Python code to solve the task/problem at hand provided by the user.
@@ -68,3 +69,45 @@ def extract_tool_docstrings(tools_folder):
     
     # Combine all tool descriptions
     return "tool_descriptions = \"\"\"\n" + "\n\n".join(tool_descriptions) + "\n\"\"\""
+
+def execute_python_code(code_str):
+    """
+    Safely execute Python code from a string.
+    
+    Args:
+        code_str (str): Python code to execute
+    
+    Returns:
+        Result of execution or error message
+    """
+    try:
+        # Create a local namespace to prevent global modifications
+        local_namespace = {}
+        
+        # Execute the code
+        exec(code_str, globals(), local_namespace)
+        
+        # If the code contains a 'result' variable, return it
+        return local_namespace.get('result', 'Code executed successfully')
+    
+    except Exception as e:
+        return f"Error executing code: {str(e)}"
+
+def extract_and_execute_code(response):
+    """
+    Extract Python code from markdown code block and execute it.
+    
+    Args:
+        response (str): LLM response containing Python code
+    
+    Returns:
+        Result of code execution
+    """
+    # Extract code between triple backticks
+    code_match = re.search(r'```python\n(.*?)```', response, re.DOTALL)
+    
+    if code_match:
+        code = code_match.group(1).strip()
+        return execute_python_code(code)
+    
+    return "No Python code found in response"

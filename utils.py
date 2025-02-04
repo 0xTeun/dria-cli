@@ -1,7 +1,9 @@
 import textwrap
 import ast
 import os
-import re
+from exec_python import execute_python_code
+import importlib
+import inspect
 
 SYSTEM_PROMPT = """
 You are an expert AI assistant that specializes in providing Python code to solve the task/problem at hand provided by the user.
@@ -70,44 +72,57 @@ def extract_tool_docstrings(tools_folder):
     # Combine all tool descriptions
     return "tool_descriptions = \"\"\"\n" + "\n\n".join(tool_descriptions) + "\n\"\"\""
 
-def execute_python_code(code_str):
+def collect_tool_functions(tools_directory):
     """
-    Safely execute Python code from a string.
+    Collect all @tool decorated functions from Python files in a directory
     
     Args:
-        code_str (str): Python code to execute
+        tools_directory (str): Path to directory containing tool files
     
     Returns:
-        Result of execution or error message
+        list: Collected tool functions
     """
-    try:
-        # Create a local namespace to prevent global modifications
-        local_namespace = {}
-        
-        # Execute the code
-        exec(code_str, globals(), local_namespace)
-        
-        # If the code contains a 'result' variable, return it
-        return local_namespace.get('result', 'Code executed successfully')
+    available_tools = []
     
-    except Exception as e:
-        return f"Error executing code: {str(e)}"
+    # Iterate through Python files in the directory
+    for filename in os.listdir(tools_directory):
+        if filename.endswith('.py') and not filename.startswith('__'):
+            module_name = filename[:-3]
+            try:
+                # Dynamically import the module
+                module = importlib.import_module(f'tools.{module_name}')
+                
+                # Collect functions with @tool decorator
+                for name, func in inspect.getmembers(module):
+                    if inspect.isfunction(func) and hasattr(func, 'is_tool'):
+                        available_tools.append(func)
+            except ImportError as e:
+                print(f"Error importing {module_name}: {e}")
+    
+    return available_tools
 
 def extract_and_execute_code(response):
     """
-    Extract Python code from markdown code block and execute it.
+    Extract and execute Python code from response
     
     Args:
-        response (str): LLM response containing Python code
+        response (str): LLM response with code block
+        available_tools (list): List of tool functions
     
     Returns:
-        Result of code execution
+        Execution results
     """
-    # Extract code between triple backticks
+    import re
+    
     code_match = re.search(r'```python\n(.*?)```', response, re.DOTALL)
     
     if code_match:
         code = code_match.group(1).strip()
-        return execute_python_code(code)
+        results = execute_python_code(
+            code=code,
+            functions=collect_tool_functions("tools")
+        )
+        print(results)
+        return results
     
     return "No Python code found in response"

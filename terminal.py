@@ -33,7 +33,8 @@ class DriaTerminal:
                 print("LLM Response:")
                 print(response)
                 print("Code Execution")
-                extract_and_execute_code(response)
+                results = extract_and_execute_code(response)
+                print(results)
 
                 
             except KeyboardInterrupt:

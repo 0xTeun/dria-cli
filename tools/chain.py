@@ -21,7 +21,7 @@ def activate_chain(chain:str, network:str):
         network (str, optional): The type of the chain to activate. 
     """
     try:
-        with networks.parse_network_choice(f"{chain}:{network}:alchemy") as provider:
+        with networks.parse_network_choice(f"{chain}:{network}:node") as provider:
             print(f"Activated {provider.network_choice}")
             return provider
     except Exception as e:

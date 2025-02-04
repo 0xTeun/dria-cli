@@ -2,12 +2,10 @@ name: smol-dria-terminal
 
 default_network: ethereum
 
-ethereum:
-  default_network: mainnet
-  mainnet:
-    default_provider: alchemy
-
-arbitrum:
-  default_network: mainnet
-  mainnet:
-    default_provider: alchemy
+node:
+  arbitrum:
+    mainnet:
+      uri: https://arbitrum.llamarpc.com
+  ethereum:
+    mainnet:
+      uri: https://eth.llamarpc.com

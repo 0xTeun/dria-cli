@@ -118,11 +118,11 @@ def extract_and_execute_code(response):
     
     if code_match:
         code = code_match.group(1).strip()
-        results = execute_python_code(
+        function_results = execute_python_code(
             code=code,
             functions=collect_tool_functions("tools")
         )
-        print(results)
-        return results
+        print(function_results)
+        return function_results
     
     return "No Python code found in response"

@@ -1,6 +1,14 @@
 name: smol-dria-terminal
 
-default_network: ethereum
+ethereum:
+  default_network: mainnet
+  mainnet:
+    default_provider: node
+
+arbitrum:
+  default_network: mainnet
+  mainnet:
+    default_provider: node
 
 node:
   arbitrum:
@@ -9,3 +17,10 @@ node:
   ethereum:
     mainnet:
       uri: https://eth.llamarpc.com
+  optimism:
+    mainnet:
+      uri: https://optimism.llamarpc.com
+
+plugins:
+  - name: arbitrum
+  - name: optimism

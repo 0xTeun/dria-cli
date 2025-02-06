@@ -1,5 +1,4 @@
 from ape.api.providers import BlockAPI
-from ape import chain, networks
 
 def tool(func):
     """
@@ -20,13 +19,52 @@ def activate_chain(chain:str, network:str):
         chain (str): The name of the blockchain to activate.
         network (str, optional): The type of the chain to activate. 
     """
+    from ape import networks
+    from ape.exceptions import ProviderNotConnectedError
     try:
-        with networks.parse_network_choice(f"{chain}:{network}:node") as provider:
-            print(f"Activated {provider.network_choice}")
-            return provider
+        # Check if there's an existing connection and disconnect
+        if networks.connected:
+            networks.active_provider.disconnect()
+            print("Previous connection closed")
+    except ProviderNotConnectedError:
+        pass
+
+    # Be more explicit with the network choice
+    network_choice = f"{chain.lower()}:{network.lower()}"
+    print(f"Attempting to connect to {network_choice}")
+    
+    # Check if ecosystem is available
+    if chain not in networks.ecosystems:
+        raise ValueError(f"Ecosystem {chain} not found. Available: {list(networks.ecosystems.keys())}")
+    
+    provider = networks.parse_network_choice(f"{chain}:{network}:node")
+    try:
+        provider.__enter__()
+        print(f"Successfully connected to {provider.provider.network_choice}")
+        return True
     except Exception as e:
-        print(e)
-        return None
+        print(f"Connection error: {str(e)}")
+        raise
+    # try:
+    # # Check if there's an existing connection and disconnect
+    #     if networks.connected:
+    #         networks.active_provider.disconnect()
+    #         networks.provider.disconnect()
+    #         # networks.provider.disconnect()
+    #         print("Previous connection closed")
+    # except ProviderNotConnectedError:
+    #     # No existing connection, that's fine
+    #     pass
+    # # print(f"Is connected: {networks.provider.is_connected}")
+    # # if not networks.provider.is_connected:
+    # #     networks.provider.disconnect()
+    
+    # provider = networks.parse_network_choice(f"{chain}:{network}:node")
+    # provider.__enter__()
+    # # print(f"{provider.is_connected}: Connected to {provider.network_choice}")
+
+    # return True
+
 
 @tool
 def get_latest_block() -> dict:

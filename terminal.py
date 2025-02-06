@@ -36,6 +36,7 @@ class DriaTerminal:
                 results = extract_and_execute_code(response)
                 print(results)
 
+
                 
             except KeyboardInterrupt:
                 continue
@@ -43,7 +44,3 @@ class DriaTerminal:
                 break
             except Exception as e:
                 print(f"Error: {str(e)}")
-
-        # Cleanup on exit
-        if networks.active_provider:
-            networks.active_provider.disconnect()

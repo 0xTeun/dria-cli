@@ -2,22 +2,22 @@ from prompt_toolkit import PromptSession
 from prompt_toolkit.formatted_text import HTML
 from ape import networks
 from agent import create_dria_agent
-from tools.chain import activate_chain
-from utils import extract_and_execute_code
+from tools.tools_manager import ToolManager
 
 class DriaTerminal:
     def __init__(self):
         self.session = PromptSession()
-        self.connection = activate_chain("ethereum", "mainnet")
-        chain_str = networks.provider.connection_id
-        self.network, self.chain, *_ = chain_str.split(':', 2)
-        self.agent = create_dria_agent() 
+        # self.connection = activate_chain("ethereum", "mainnet")
+        # chain_str = networks.provider.connection_id
+        # self.network, self.chain, *_ = chain_str.split(':', 2)
+        self.tools = ToolManager("tools")
+        self.agent = create_dria_agent(self.tools) 
 
     def get_prompt(self):
         """Generate the IPython-style prompt"""
         # network = self.network_info or "not-connected"
         # account = self.account.address[:6] + "..." + self.account.address[-3:] if self.account else "no-wallet"
-        return HTML(f'[<blue>{self.network}:{self.chain}</blue>][<green>WALLET_PLACEHOLDER</green>] >> ')
+        return HTML(f'[<blue>PLACE_HOLDER</blue>][<green>WALLET_PLACEHOLDER</green>] >> ')
 
     def run(self):
         """Run the terminal interface"""
@@ -34,13 +34,9 @@ class DriaTerminal:
                 print("LLM Response:")
                 print(response)
                 print("Code Execution")
-                results = extract_and_execute_code(response)
+                results = self.tools.execute_llm_response(response)
                 print(results)
                 print("test in here")
-                print(f"{networks.provider.is_connected}: Connected to {networks.provider.network_choice}")
-
-
-
                 
             except KeyboardInterrupt:
                 continue
